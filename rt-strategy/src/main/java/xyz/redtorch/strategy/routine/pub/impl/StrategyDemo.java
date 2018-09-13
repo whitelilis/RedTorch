@@ -1,5 +1,7 @@
 package xyz.redtorch.strategy.routine.pub.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.redtorch.core.entity.Bar;
 import xyz.redtorch.core.entity.Order;
 import xyz.redtorch.core.entity.Tick;
@@ -13,6 +15,7 @@ import xyz.redtorch.core.zeus.strategy.StrategySetting;
  * @author sun0x00@gmail.com
  */
 public class StrategyDemo extends StrategyAbstract{
+	private static final Logger log = LoggerFactory.getLogger(StrategyDemo.class);
 
 	public StrategyDemo(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
@@ -35,11 +38,13 @@ public class StrategyDemo extends StrategyAbstract{
 
 	@Override
 	public void onTick(Tick tick) throws Exception {
+		log.info("call on tick");
 	}
 
 	@Override
 	public void onBar(Bar bar) throws Exception {
 
+		/*
 		Integer i = 0;
 		if(strategySetting.getVarMap().containsKey("testBar")) {
 			i = Integer.valueOf(strategySetting.getVarMap().get("testBar"));
@@ -70,7 +75,7 @@ public class StrategyDemo extends StrategyAbstract{
 				sellShortByPreset(ihSymbol, bar.getClose()-1);
 			}
 		}
-		
+		*/
 	}
 
 	@Override

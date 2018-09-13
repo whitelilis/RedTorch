@@ -26,3 +26,4 @@ dependencies {
 	testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:"${rootProject.springBootVersion}"
 	testCompile group: 'org.springframework', name: 'spring-test', version: "${rootProject.springTestVersion}"
 }
+

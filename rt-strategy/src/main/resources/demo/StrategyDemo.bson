@@ -1,82 +1,46 @@
-{ 
-    "className" : "xyz.redtorch.strategy.routine.pub.impl.StrategyDemo", 
-    "contracts" : [
-        {
-            "alias" : "IH", 
-            "backtestingPriceTick" : 0.2, 
-            "backtestingSlippage" : 0.4, 
-            "exchange" : "CFFEX", 
-            "rtSymbol" : "IH1805.CFFEX", 
-            "size" : NumberInt(300), 
-            "tradeFixedPos" : NumberInt(5), 
-            "tradeGateways" : [
+{
+        "_id": {
+                "$oid": "5b999243a774579f6121cdc3"
+        },
+        "className": "xyz.redtorch.strategy.routine.pub.impl.StrategyDemo",
+        "contracts": [
                 {
-                    "backtestingRate" : 0.0001, 
-                    "gatewayID" : "9999.724SN02.187.10030", 
-                    "tradeFixedPos" : NumberInt(2)
-                }, 
-                {
-                    "backtestingRate" : 0.0004, 
-                    "gatewayID" : "9999.724SN01.187.10030", 
-                    "tradeFixedPos" : NumberInt(3)
+                        "alias": "rb",
+                        "backtestingPriceTick": 0.2,
+                        "backtestingSlippage": 0.4,
+                        "exchange": "SHFE",
+                        "rtSymbol": "rb1901.SHFE",
+                        "size": 300,
+                        "tradeFixedPos": 5,
+                        "tradeGateways": [
+                                {
+                                        "backtestingRate": 0.0001,
+                                        "gatewayID": "9999.simnow1.187.10000",
+                                        "tradeFixedPos": 2
+                                }
+                        ]
                 }
-            ]
-        }, 
-        {
-            "alias" : "IC", 
-            "backtestingPriceTick" : 0.2, 
-            "backtestingSlippage" : 0.4, 
-            "exchange" : "CFFEX", 
-            "rtSymbol" : "IC1805.CFFEX", 
-            "size" : NumberInt(200), 
-            "tradeFixedPos" : NumberInt(18), 
-            "tradeGateways" : [
+        ],
+        "gateways": [
                 {
-                    "backtestingRate" : 0.0001, 
-                    "gatewayID" : "9999.724SN02.187.10030", 
-                    "tradeFixedPos" : NumberInt(10)
-                }, 
-                {
-                    "backtestingRate" : 0.0004, 
-                    "gatewayID" : "9999.724SN01.187.10030", 
-                    "tradeFixedPos" : NumberInt(8)
+                        "backtestingCapital": 5e+06,
+                        "gatewayID": "9999.simnow1.187.10000",
+                        "subscribeRtSymbols": [
+                                "rb1901.SHFE"
+                        ]
                 }
-            ]
-        }
-    ], 
-    "gateways" : [
-        {
-            "backtestingCapital" : 5000000.0, 
-            "gatewayID" : "9999.724SN02.187.10030", 
-            "subscribeRtSymbols" : [
-                "IF1805.CFFEX"
-            ]
-        }, 
-        {
-            "backtestingCapital" : 2000000.0, 
-            "gatewayID" : "9999.724SN01.187.10030", 
-            "subscribeRtSymbols" : [
-                "IH1805.CFFEX", 
-                "IC1806.CFFEX"
-            ]
-        }
-    ], 
-    "lastTradingDay" : false, 
-    "paramMap" : {
-        "pTetsB" : "2.0", 
-        "pTtetsA" : "1.0"
-    }, 
-    "preTradingDay" : "20180403", 
-    "strategyID" : "StrategyDemo01", 
-    "strategyName" : "StrategyDemo01", 
-    "tradingDay" : "20180404", 
-    "varMap" : {
-        "vTetsA" : "3.0", 
-        "test" : "1", 
-        "vTetsC" : "5.0", 
-        "vTetsB" : "4.0", 
-        "testBar" : "33", 
-        "testTick" : "2138"
-    }, 
-    "xMin" : NumberInt(0)
+        ],
+        "lastTradingDay": false,
+        "paramMap": {
+                "pTetsB": "2.0",
+                "pTtetsA": "1.0"
+        },
+        "preTradingDay": "20180912",
+        "strategyID": "StrategyDemo01",
+        "strategyName": "wizardJava1",
+        "tradingDay": "20180913",
+        "varMap": {
+                "nick": "simnow real rb1901"
+        },
+        "xMin": 0
 }
