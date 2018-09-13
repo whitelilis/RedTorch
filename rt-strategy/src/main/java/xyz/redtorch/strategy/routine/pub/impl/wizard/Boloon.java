@@ -51,9 +51,9 @@ public class Boloon extends StrategyAbstract{
 	@Override
 	public void onTick(Tick tick) throws Exception {
 		log.info(String.format(
-				"type: %s, price : %f, uppper : %f, lower : %f, time : %s",
+				"type: %s, price: %f, longIn: %f, shortIn: %f,  longOut: %f, shortOut: %f, time : %s",
 				tick.getRtSymbol(), tick.getLastPrice(),
-				tick.getUpperLimit(), tick.getLowerLimit(),
+				meta.longIn, meta.shortIn, meta.longOut, meta.shortOut,
 				tick.getDateTime()
 		));
 
