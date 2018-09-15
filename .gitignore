@@ -44,4 +44,16 @@ hft/
 rt-api-pctp/
 rt-gateway-pctp/
 
-
+# wizard private
+*.git
+*.project
+*.classpath
+*.prefs
+*.bat
+target/*
+*/target/*
+/bin
+.idea
+*.iml
+out
+*.DS_Store
