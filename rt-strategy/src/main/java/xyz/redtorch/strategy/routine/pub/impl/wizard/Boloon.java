@@ -53,8 +53,9 @@ public class Boloon extends StrategyAbstract{
 	    Meta meta = plans.get(tick.getRtSymbol());
 		log.info(String.format(
 				"type: %s, price: %f, longIn: %f, shortIn: %f,  longOut: %f, shortOut: %f, time : %s",
-				tick.getRtSymbol(), tick.getLastPrice(),
-				meta.longIn, meta.shortIn, meta.longOut, meta.shortOut,
+				"{} : [ {}, {} ] {} [ {}, {} ] @ {}",
+				tick.getRtSymbol(),
+				meta.longIn, meta.longOut, tick.getLastPrice(),  meta.shortOut, meta.shortIn,
 				tick.getDateTime()
 		));
 
@@ -92,11 +93,13 @@ public class Boloon extends StrategyAbstract{
 	@Override
 	public void onBar(Bar bar) throws Exception {
 		// todo: update somethis
+		log.info("call onBar");
+		savePosition();
 	}
 
 	@Override
 	public void onXMinBar(Bar bar) throws Exception {
-		savePosition();
+		log.info("call onXMinBar");
 	}
 
 	@Override
