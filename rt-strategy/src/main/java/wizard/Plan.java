@@ -1,4 +1,4 @@
-package xyz.redtorch.strategy.routine.pub.impl.wizard;
+package wizard;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author: whitelilis@gmail.com on 18/9/13
  */
-public class Meta {
-    private static final Logger log = LoggerFactory.getLogger(Meta.class);
+public class Plan {
+    private static final Logger log = LoggerFactory.getLogger(Plan.class);
     public Signal lastOP = Signal.NOOP;
     public int volume = 0;
     public Signal volType = Signal.NOOP;
@@ -21,9 +21,15 @@ public class Meta {
     public double shortIn = Float.MIN_VALUE;
     public double shortOut = shortIn * (1 + lossRate);
 
-    public Meta(float longIn, float shortIn){
+    public Plan(float longIn, float shortIn){
         this.longIn = longIn;
         this.shortIn = shortIn;
+    }
+
+    public Plan(float longIn, float shortIn, float lossRate, float profitRate){
+        this(longIn, shortIn);
+        this.lossRate = lossRate;
+        this.profitRate = profitRate;
     }
 
     public enum Signal {
