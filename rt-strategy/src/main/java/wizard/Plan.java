@@ -54,19 +54,19 @@ public class Plan {
         } else if (newPrice > shortOut){
             return Signal.SHORT_OUT;
         } else {
-            log.error("WWW impossible happens when price is {}", newPrice);
+            log.error("WWW impossible happens when price is %.2f", newPrice);
             return Signal.IMPOSSIABLE;
         }
     }
 
     public void updateByPrice(double newPrice, Signal signel){
         if(signel == Signal.LONG_IN){
-           longIn = longIn * (1 + profitRate);
+           longIn = newPrice * (1 + profitRate);
            longOut = newPrice * (1 - lossRate);
            volType = Signal.LONG_IN;
            volume = volume + 1;
         }else if(signel == Signal.SHORT_IN){
-            shortIn = shortIn * ( 1 - profitRate);
+            shortIn = newPrice * ( 1 - profitRate);
             shortOut = newPrice * ( 1 + lossRate);
             volType = Signal.SHORT_IN;
             volume = volume + 1;
@@ -75,11 +75,11 @@ public class Plan {
             double maybeBig = newPrice * (1 - lossRate);
             double maybeSmall = newPrice * (1 + lossRate);
             if(maybeBig > longOut){
-                log.info("update logout {} ==> {}", longOut, maybeBig);
+                log.info("update logout %.2f ==> %.2f", longOut, maybeBig);
                 longOut = maybeBig;
             }
             if(maybeSmall < shortOut){
-                log.info("update shortOut {} ==> {}", shortOut, maybeSmall);
+                log.info("update shortOut %.2f ==> %.2f", shortOut, maybeSmall);
                 shortOut = maybeSmall;
             }
         }else{ // todo : when out, do what?

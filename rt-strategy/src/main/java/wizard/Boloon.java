@@ -51,13 +51,12 @@ public class Boloon extends StrategyAbstract{
 	@Override
 	public void onTick(Tick tick) throws Exception {
 	    Plan meta = plans.get(tick.getRtSymbol());
-		log.info(String.format(
-				"type: %s, price: %f, longIn: %f, shortIn: %f,  longOut: %f, shortOut: %f, time : %s",
-				"{} : [ {}, {} ] {} [ {}, {} ] @ {}",
+		log.info(
+				"%s : [ %.2f, %.2f ] %.2f [ %.2f, %.2f ] @ %s",
 				tick.getRtSymbol(),
 				meta.longIn, meta.longOut, tick.getLastPrice(),  meta.shortOut, meta.shortIn,
 				tick.getDateTime()
-		));
+		);
 
 		if(meta.lastOP != Plan.Signal.NOOP) {// something is still doing
 			// todo: how to track the order?  succeed/failed/partly

@@ -57,13 +57,12 @@ public class Blind extends StrategyAbstract{
 	@Override
 	public void onTick(Tick tick) throws Exception {
 	    Plan plan = plans.get(tick.getRtSymbol());
-		log.info(String.format(
-				"type: %s, price: %f, longIn: %f, shortIn: %f,  longOut: %f, shortOut: %f, time : %s",
-				"{} : [ {}, {} ] {} [ {}, {} ] @ {}",
+		log.info(
+				"%s : [ %.2f, %.2f ] %.2f [ %.2f, %.2f ] @ %s",
 				tick.getRtSymbol(),
 				plan.longIn, plan.longOut, tick.getLastPrice(),  plan.shortOut, plan.shortIn,
 				tick.getDateTime()
-		));
+		);
 
 		if(plan.lastOP != Plan.Signal.NOOP) {// something is still doing
 			// todo: how to track the order?  succeed/failed/partly
