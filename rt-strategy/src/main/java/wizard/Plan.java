@@ -54,7 +54,7 @@ public class Plan {
         } else if (newPrice > shortOut){
             return Signal.SHORT_OUT;
         } else {
-            log.error("WWW impossible happens when price is %.2f", newPrice);
+            log.error(String.format("WWW impossible happens when price is %.2f", newPrice));
             return Signal.IMPOSSIABLE;
         }
     }
@@ -75,11 +75,11 @@ public class Plan {
             double maybeBig = newPrice * (1 - lossRate);
             double maybeSmall = newPrice * (1 + lossRate);
             if(maybeBig > longOut){
-                log.info("update logout %.2f ==> %.2f", longOut, maybeBig);
+                log.info(String.format("update logout %.2f ==> %.2f", longOut, maybeBig));
                 longOut = maybeBig;
             }
             if(maybeSmall < shortOut){
-                log.info("update shortOut %.2f ==> %.2f", shortOut, maybeSmall);
+                log.info(String.format("update shortOut %.2f ==> %.2f", shortOut, maybeSmall));
                 shortOut = maybeSmall;
             }
         }else{ // todo : when out, do what?
