@@ -24,6 +24,9 @@ public class Blind extends StrategyAbstract{
 	private HashMap<String, Plan> plans;
 	private Random random ;
 
+	public static final float lossRate = 0.005f;
+	public static final float profitRate = 0.02f;
+
 	public Blind(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
 	}
@@ -34,12 +37,17 @@ public class Blind extends StrategyAbstract{
 	    this.random = new java.util.Random();
 		Map<String, String> varMap = strategySetting.getVarMap();
 		for(StrategySetting.ContractSetting contractSetting : strategySetting.getContracts()){
-			float r = random.nextFloat();
 			String rtSymbol = contractSetting.getRtSymbol();
-			if(r < 0.5) { // buy long in
-				this.plans.put(rtSymbol, new Plan(Float.MIN_VALUE, Float.MIN_VALUE, 0.005f, 0.02f));
-			}else{ // sell short out
-				this.plans.put(rtSymbol, new Plan(Float.MAX_VALUE, Float.MAX_VALUE, 0.005f, 0.02f));
+			String planKey = Plan.saveKey(rtSymbol);
+			if(varMap.containsKey(planKey)) {// already traded before
+				this.plans.put(rtSymbol, Plan.fromJson(varMap.get(planKey)));
+			} else {
+				float r = random.nextFloat();
+				if (r < 0.5) { // buy long in
+					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
+				} else { // sell short out
+					this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
+				}
 			}
 		}
 	}
@@ -104,7 +112,13 @@ public class Blind extends StrategyAbstract{
 
 	@Override
 	public void onXMinBar(Bar bar) throws Exception {
+		// todo: save current plans
 		log.info("call onXMinBar");
+		String symbol = bar.getRtSymbol();
+		Plan plan = plans.get(symbol);
+		String key = Plan.saveKey(symbol);
+		strategySetting.getVarMap().put(key, plan.toJson());
+		saveStrategySetting();
 	}
 
 	@Override
@@ -112,9 +126,34 @@ public class Blind extends StrategyAbstract{
 		log.info(String.format("enter order, get status %s:%s:%d:%f:%s",
 				order.getRtSymbol(), order.getDirection(), order.getTotalVolume(),
 				order.getPrice(), order.getStatus()));
-		if(order.getStatus() == RtConstant.STATUS_CANCELLED){
-			Plan plan = plans.get(order.getRtSymbol());
-			plan.lastOP = Plan.Signal.NOOP;
+		Plan plan = plans.get(order.getRtSymbol());
+
+		switch (order.getStatus()){
+			case RtConstant.STATUS_CANCELLED:
+				plan.lastOP = Plan.Signal.NOOP;
+				break;
+			case RtConstant.STATUS_ALLTRADED:
+				switch (plan.lastOP){
+					case SHORT_OUT:
+						log.warn("sell -> buy");
+						plans.put(order.getRtSymbol(), Plan.buyPlan(lossRate, profitRate));
+						break;
+					case LONG_OUT:
+						log.warn("buy -> sell");
+						plans.put(order.getRtSymbol(), Plan.sellPlan(lossRate, profitRate));
+						break;
+					default:
+						// todo: buy/sell or other complete
+						log.warn("{} complete, ignored", plan.lastOP);
+				}
+				break;
+			case RtConstant.STATUS_PARTTRADED:
+				// todo: partly traded
+				log.error("TODO TODO");
+				break;
+			default:
+				// todo: what happened?
+				log.error("MMP MMP");
 		}
 	}
 

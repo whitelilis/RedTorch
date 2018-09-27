@@ -1,5 +1,6 @@
 package wizard;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Plan {
     private static final Logger log = LoggerFactory.getLogger(Plan.class);
+    public static final String savePrefix = "wizard_plan_";
     public Signal lastOP = Signal.NOOP;
     public int volume = 0;
     public Signal volType = Signal.NOOP;
@@ -25,14 +27,37 @@ public class Plan {
         this.longIn = longIn;
         this.shortIn = shortIn;
     }
-
-    // todo : Plan.validate() check values
-
     public Plan(float longIn, float shortIn, float lossRate, float profitRate){
         this(longIn, shortIn);
         this.lossRate = lossRate;
         this.profitRate = profitRate;
     }
+
+    public static Plan buyPlan(float lossRate, float profitRate){
+		return new Plan(Float.MIN_VALUE, Float.MIN_VALUE, lossRate, profitRate);
+	}
+
+	public static Plan sellPlan(float lossRate, float profitRate){
+		return new Plan(Float.MAX_VALUE, Float.MAX_VALUE, lossRate, profitRate);
+	}
+
+
+    public static String saveKey(String rtSymbol){
+        return savePrefix + rtSymbol;
+    }
+
+    // todo toJson
+    public String toJson() {
+        return JSONObject.toJSONString(this);
+    }
+
+    // todo fromJson
+    public static Plan fromJson(String json){
+        return JSONObject.parseObject(json, Plan.class);
+    }
+
+
+    // todo : Plan.validate() check values
 
     public enum Signal {
         NOOP,
@@ -62,29 +87,34 @@ public class Plan {
     }
 
     public void updateByPrice(double newPrice, Signal signel){
-        if(signel == Signal.LONG_IN){
-           longIn = newPrice * (1 + profitRate);
-           longOut = newPrice * (1 - lossRate);
-           volType = Signal.LONG_IN;
-           volume = volume + 1;
-        }else if(signel == Signal.SHORT_IN){
-            shortIn = newPrice * ( 1 - profitRate);
-            shortOut = newPrice * ( 1 + lossRate);
-            volType = Signal.SHORT_IN;
-            volume = volume + 1;
-        }else if(signel == Signal.NOOP){
-            // when no op, maybe update loss price
-            double maybeBig = newPrice * (1 - lossRate);
-            double maybeSmall = newPrice * (1 + lossRate);
-            if(maybeBig > longOut){
-                log.info(String.format("update logout %.2f ==> %.2f", longOut, maybeBig));
-                longOut = maybeBig;
-            }
-            if(maybeSmall < shortOut){
-                log.info(String.format("update shortOut %.2f ==> %.2f", shortOut, maybeSmall));
-                shortOut = maybeSmall;
-            }
-        }else{ // todo : when out, do what?
+        switch (signel){
+            case LONG_IN:
+                longIn = newPrice * (1 + profitRate);
+                longOut = newPrice * (1 - lossRate);
+                volType = Signal.LONG_IN;
+                volume = volume + 1;
+                break;
+            case SHORT_IN:
+                shortIn = newPrice * ( 1 - profitRate);
+                shortOut = newPrice * ( 1 + lossRate);
+                volType = Signal.SHORT_IN;
+                volume = volume + 1;
+                break;
+            case NOOP:
+                // when no op, maybe update loss price
+                double maybeBig = newPrice * (1 - lossRate);
+                double maybeSmall = newPrice * (1 + lossRate);
+                if (maybeBig > longOut) {
+                    log.info(String.format("update logout %.2f ==> %.2f", longOut, maybeBig));
+                    longOut = maybeBig;
+                }
+                if (maybeSmall < shortOut) {
+                    log.info(String.format("update shortOut %.2f ==> %.2f", shortOut, maybeSmall));
+                    shortOut = maybeSmall;
+                }
+                break;
+            default: // todo: what to do others ? es. sellOut/buyOut
+                log.error("MMP");
         }
     }
 
