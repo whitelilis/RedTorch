@@ -83,7 +83,7 @@ public class Blind extends StrategyAbstract{
 					buy(tick.getRtSymbol(), 1, tick.getUpperLimit(), tick.getGatewayID());
 					break;
 				case SHORT_IN:
-					sellShort(tick.getRtSymbol(), 1, tick.getUpperLimit(), tick.getGatewayID());
+					sellShort(tick.getRtSymbol(), 1, tick.getLowerLimit(), tick.getGatewayID());
 					break;
 				case LONG_OUT:
 					sellByPosition(tick.getRtSymbol(), tick.getLowerLimit());

@@ -26,6 +26,8 @@ public class Plan {
         this.shortIn = shortIn;
     }
 
+    // todo : Plan.validate() check values
+
     public Plan(float longIn, float shortIn, float lossRate, float profitRate){
         this(longIn, shortIn);
         this.lossRate = lossRate;
