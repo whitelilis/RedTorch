@@ -1,8 +1,5 @@
 package xyz.redtorch.startegy.backtesting;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import xyz.redtorch.core.test.TestConfiguration;
 import xyz.redtorch.core.zeus.BacktestingEngine;
-import xyz.redtorch.core.zeus.ZeusDataService;
 import xyz.redtorch.core.zeus.BacktestingEngine.BacktestingSection;
+import xyz.redtorch.core.zeus.ZeusDataService;
 import xyz.redtorch.core.zeus.impl.BacktestingEngineImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -37,30 +36,32 @@ public class StrategyDemoBacktesting {
 	@Test
 	public void testStrategy() throws Exception {
 
-		String strategyID = "StrategyDemo01";
+		String strategyID = "wizard 113";
 		boolean reloadStrategyEveryday = false;
-		int backtestingDataMode = BacktestingEngine.DATA_MODE_BAR;
+		int backtestingDataMode = BacktestingEngine.DATA_MODE_TICK;
 		List<BacktestingSection> backestingSectionList = new ArrayList<>();
 		// 分段回测
 		BacktestingSection backtestingSection = new BacktestingSection();
-		backtestingSection.setStartDate("20180222");
-		backtestingSection.setEndDate("20180319");
+		backtestingSection.setStartDate("20170401");
+		backtestingSection.setEndDate("20170405");
+
+		String aim = "rb1710.SHFE";
+
+		backtestingSection.addAliasRtSymbol("rb", aim);
+
+		backtestingSection.addSubscribeRtSymbol("backTest", aim);
+		//backtestingSection.addSubscribeRtSymbol("9999.sn.187.10000", aim);
+		//backtestingSection.addSubscribeRtSymbol("9999.sn724.187.10030", aim);
+		/*
 		backtestingSection.addAliasRtSymbol("IC", "IC1803.CFFEX");
 		backtestingSection.addAliasRtSymbol("IH", "IH1803.CFFEX");
 
 		backtestingSection.addSubscribeRtSymbol("9999.724SN02.187.10030", "IF1803.CFFEX");
 		backtestingSection.addSubscribeRtSymbol("9999.724SN01.187.10030", "IC1803.CFFEX");
 		backtestingSection.addSubscribeRtSymbol("9999.724SN01.187.10030", "IH1803.CFFEX");
+		*/
 
 		backestingSectionList.add(backtestingSection);
-
-		// backtestingSection= new BacktestingSection();
-		// backtestingSection.setStartDate("20180321");
-		// backtestingSection.setEndDate("20180323");
-		// backtestingSection.addAliasRtSymbol("IF", "1804");
-		// backtestingSection.addAliasRtSymbol("IC", "1804");
-		// backtestingSection.addAliasRtSymbol("IH", "1804");
-		// backestingSectionList.add(backtestingSection);
 
 		BacktestingEngine backtestingEngine = new BacktestingEngineImpl(zeusDataService, strategyID,
 				backestingSectionList, backtestingDataMode, reloadStrategyEveryday, backtestingOutputDir);
