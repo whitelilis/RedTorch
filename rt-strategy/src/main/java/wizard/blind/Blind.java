@@ -47,7 +47,8 @@ public class Blind extends StrategyAbstract{
 				float r = random.nextFloat();
 
 				// force sell
-				this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
+				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
+				this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
 				/*
 				if (r < 0.5) { // buy long in
 					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
@@ -100,7 +101,7 @@ public class Blind extends StrategyAbstract{
 					break;
 				case SHORT_IN:
 					log.warn("will short in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					orderId = sellShort(tick.getRtSymbol(), 1, tick.getUpperLimit(), tick.getGatewayID());
+					orderId = sellShort(tick.getRtSymbol(), 1, tick.getLowerLimit(), tick.getGatewayID());
 					plan.orderManager.addOrder(orderId, null);
 					break;
 				// todo: only shangHai consider today/yestoday ??
@@ -132,21 +133,21 @@ public class Blind extends StrategyAbstract{
 					if(today.equals(plan.lastInDate)){
 						if(plan.todayVolume > 0) {
 							log.warn("will short out today {}", plan.todayVolume);
-							orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, tick.getHighPrice(), tick.getGatewayID());
+							orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, tick.getUpperLimit(), tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// skip today
 						}
 						if(plan.yestodayVolume > 0) {
 							log.warn("will short out yestoday {}", plan.yestodayVolume);
-							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume, tick.getHighPrice(), tick.getGatewayID());
+							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume, tick.getUpperLimit(), tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// no one ??? long out what???
 						}
 					}else{
 						log.warn("will short out all yestoday {}", plan.todayVolume + plan.yestodayVolume);
-						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, tick.getHighPrice(), tick.getGatewayID());
+						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, tick.getUpperLimit(), tick.getGatewayID());
 						plan.orderManager.addOrder(orderId, null);
 					}
 					break;

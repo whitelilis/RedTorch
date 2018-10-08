@@ -42,14 +42,14 @@ public class StrategyDemoBacktesting {
 		List<BacktestingSection> backestingSectionList = new ArrayList<>();
 		// 分段回测
 		BacktestingSection backtestingSection = new BacktestingSection();
-		backtestingSection.setStartDate("20170401");
-		backtestingSection.setEndDate("20170405");
+		backtestingSection.setStartDate("20181008");
+		backtestingSection.setEndDate("20181009");
 
-		String aim = "rb1710.SHFE";
+		String aim = "rb1901.SHFE";
 
 		backtestingSection.addAliasRtSymbol("rb", aim);
 
-		backtestingSection.addSubscribeRtSymbol("backTest", aim);
+		backtestingSection.addSubscribeRtSymbol("9999.sn.187.10000", aim);
 		//backtestingSection.addSubscribeRtSymbol("9999.sn.187.10000", aim);
 		//backtestingSection.addSubscribeRtSymbol("9999.sn724.187.10030", aim);
 		/*
