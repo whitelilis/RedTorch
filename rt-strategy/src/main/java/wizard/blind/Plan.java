@@ -23,7 +23,7 @@ public class Plan {
     public static final double useMin = 0.88;
     public static final double useMax = 88888888.88;
     public int todayVolume = 0;
-    public int yestodayVolume = 0;
+    public int yesterdayVolume = 0;
     public String lastInDate = null;
     public double profitRate = 0.03F;
     public double lossRate = 0.01F;
@@ -76,11 +76,12 @@ public class Plan {
 
 
     public void updateVolume(Trade openTrade){
-        String tradeDate = openTrade.getDateTime().toString(RtConstant.D_FORMAT);
+        String tradeDate1 = openTrade.getTradeDate(); // yyyyMMdd
+        String tradeDate =  (tradeDate1 != null && tradeDate1.length() == 8) ? tradeDate1 : openTrade.getDateTime().toString(RtConstant.D_FORMAT_INT);
         if(lastInDate == null || lastInDate.equals(tradeDate)) {// first complete order, or the same day
             todayVolume += openTrade.getVolume();
         }else{
-            yestodayVolume += todayVolume;
+            yesterdayVolume += todayVolume;
             todayVolume = openTrade.getVolume();
         }
         lastInDate = tradeDate;

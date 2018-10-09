@@ -22,11 +22,12 @@ public class OrderManager {
 
 	public void handleOrder(Blind blind, Order order){
 		Plan plan = blind.plans.get(order.getRtSymbol());
+		String usingId = order.getRtOrderID();
 		if(order.getStatus().equals(RtConstant.STATUS_CANCELLED)) {
 			// todo: order need retry
-			orders.remove(order.getOrderID());
+			orders.remove(usingId);
 		}else if(order.getStatus().equals(RtConstant.STATUS_ALLTRADED)) {
-			orders.remove(order.getOrderID());
+			orders.remove(usingId);
 			if (orders.isEmpty()) {// the last order
 				if (order.getOffset().equals(RtConstant.OFFSET_CLOSE) ||
 						order.getOffset().equals(RtConstant.OFFSET_CLOSETODAY) ||

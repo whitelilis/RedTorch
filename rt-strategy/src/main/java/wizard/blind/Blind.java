@@ -39,21 +39,19 @@ public class Blind extends StrategyAbstract{
 		for(StrategySetting.ContractSetting contractSetting : strategySetting.getContracts()){
 			String rtSymbol = contractSetting.getRtSymbol();
 			String planKey = Plan.saveKey(rtSymbol);
-			if(varMap.containsKey(planKey)) {// already traded before
+			if(false && varMap.containsKey(planKey)) {// already traded before
 				this.plans.put(rtSymbol, Plan.fromJson(varMap.get(planKey)));
 			} else {
 				float r = random.nextFloat();
 
 				// force sell
-				this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
+				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
 				//this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
-				/*
 				if (r < 0.5) { // buy long in
 					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
 				} else { // sell short out
 					this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
 				}
-				*/
 			}
 		}
 	}
@@ -71,7 +69,7 @@ public class Blind extends StrategyAbstract{
 	@Override
 	public void onTick(Tick tick) throws Exception {
 	    Plan plan = plans.get(tick.getRtSymbol());
-		log.info(String.format(
+		log.debug(String.format(
 				"%s : %s  %.2f [ %.2f, %.2f ] @ %s",
 				tick.getRtSymbol(), plan.direction,
 				tick.getLastPrice(),  plan.inPrice, plan.outPrice,
@@ -79,7 +77,6 @@ public class Blind extends StrategyAbstract{
 		));
 
 		if(! plan.orderManager.idle()) {// something is still doing
-			// todo: how to track the order?  succeed/failed/partly
 			log.info("{} {}  is still doing; omit this tick", tick.getRtSymbol(), plan.orderManager.getOrders());
 		} else {
 			double price = tick.getLastPrice();
@@ -88,8 +85,10 @@ public class Blind extends StrategyAbstract{
 			String orderId = null;
 			double longInPrice = tick.getUpperLimit();
 			double shortInPrice = tick.getLowPrice();
-			//double longInPrice = tick.getLastPrice();
-			//double shortInPrice = tick.getLastPrice();
+			// only for backTest
+			longInPrice = tick.getLastPrice();
+			shortInPrice = tick.getLastPrice();
+
 			switch (signal) {
 				case LONG_IN:
 					log.warn("will long in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
@@ -112,16 +111,16 @@ public class Blind extends StrategyAbstract{
 						}else{
 							// skip today
 						}
-						if(plan.yestodayVolume > 0) {
-							log.warn("will long out yestoday {}", plan.yestodayVolume);
-							orderId = sellYd(tick.getRtSymbol(), plan.yestodayVolume, shortInPrice, tick.getGatewayID());
+						if(plan.yesterdayVolume > 0) {
+							log.warn("will long out yestoday {}", plan.yesterdayVolume);
+							orderId = sellYd(tick.getRtSymbol(), plan.yesterdayVolume, shortInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// no one ??? long out what???
 						}
 					}else{
-						log.warn("will long out all yestoday {}", plan.todayVolume + plan.yestodayVolume);
-						orderId = sellYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, shortInPrice, tick.getGatewayID());
+						log.warn("will long out all yestoday {}", plan.todayVolume + plan.yesterdayVolume);
+						orderId = sellYd(tick.getRtSymbol(), plan.yesterdayVolume + plan.todayVolume, shortInPrice, tick.getGatewayID());
 						plan.orderManager.addOrder(orderId, null);
 					}
 					break;
@@ -135,16 +134,16 @@ public class Blind extends StrategyAbstract{
 						}else{
 							// skip today
 						}
-						if(plan.yestodayVolume > 0) {
-							log.warn("will short out yestoday {}", plan.yestodayVolume);
-							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume, longInPrice, tick.getGatewayID());
+						if(plan.yesterdayVolume > 0) {
+							log.warn("will short out yestoday {}", plan.yesterdayVolume);
+							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yesterdayVolume, longInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// no one ??? long out what???
 						}
 					}else{
-						log.warn("will short out all yestoday {}", plan.todayVolume + plan.yestodayVolume);
-						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, longInPrice, tick.getGatewayID());
+						log.warn("will short out all yestoday {}", plan.todayVolume + plan.yesterdayVolume);
+						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yesterdayVolume + plan.todayVolume, longInPrice, tick.getGatewayID());
 						plan.orderManager.addOrder(orderId, null);
 					}
 					break;
@@ -159,20 +158,14 @@ public class Blind extends StrategyAbstract{
 
 	@Override
 	public void onBar(Bar bar) throws Exception {
-		// todo: update somethis
+		// todo: update something
 		log.debug("call onBar");
-		savePosition();
 	}
 
 	@Override
 	public void onXMinBar(Bar bar) throws Exception {
 		// todo: save current plans
 		log.debug("call onXMinBar");
-		String symbol = bar.getRtSymbol();
-		Plan plan = plans.get(symbol);
-		String key = Plan.saveKey(symbol);
-		strategySetting.getVarMap().put(key, plan.toJson());
-		saveStrategySetting();
 	}
 
 	@Override
@@ -196,8 +189,8 @@ public class Blind extends StrategyAbstract{
 		if(trade.getOffset().equals(RtConstant.OFFSET_OPEN)){
 			plan.tradePrices.add(trade.getPrice());
 			plan.updateVolume(trade);
-		}else{
-			// todo: do what?
+		}else{ // close
+			// todo: what to do when close
 		}
 
 	}

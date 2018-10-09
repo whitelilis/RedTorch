@@ -36,7 +36,7 @@ public class StrategyDemoBacktesting {
 	@Test
 	public void testStrategy() throws Exception {
 
-		String strategyID = "wizard 113";
+		String strategyID = "wizard sn";
 		boolean reloadStrategyEveryday = false;
 		int backtestingDataMode = BacktestingEngine.DATA_MODE_TICK;
 		List<BacktestingSection> backestingSectionList = new ArrayList<>();
