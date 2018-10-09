@@ -43,7 +43,7 @@ public class StrategyDemoBacktesting {
 		// 分段回测
 		BacktestingSection backtestingSection = new BacktestingSection();
 		backtestingSection.setStartDate("20181008");
-		backtestingSection.setEndDate("20181009");
+		backtestingSection.setEndDate("20181010");
 
 		String aim = "rb1901.SHFE";
 

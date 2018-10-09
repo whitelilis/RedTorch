@@ -27,8 +27,6 @@ public class Blind extends StrategyAbstract{
 	public static final float lossRate = 0.005f;
 	public static final float profitRate = 0.02f;
 
-	public static int tickLimit = 500;
-
 	public Blind(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
 	}
@@ -47,8 +45,8 @@ public class Blind extends StrategyAbstract{
 				float r = random.nextFloat();
 
 				// force sell
-				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
-				this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
+				this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
+				//this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
 				/*
 				if (r < 0.5) { // buy long in
 					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
@@ -67,23 +65,18 @@ public class Blind extends StrategyAbstract{
 
 	@Override
 	public void onStopTrading(boolean isException) throws Exception {
-		
+		log.error("STOP TRADING");
 	}
 
 	@Override
 	public void onTick(Tick tick) throws Exception {
 	    Plan plan = plans.get(tick.getRtSymbol());
-		log.debug(String.format(
+		log.info(String.format(
 				"%s : %s  %.2f [ %.2f, %.2f ] @ %s",
 				tick.getRtSymbol(), plan.direction,
 				tick.getLastPrice(),  plan.inPrice, plan.outPrice,
 				tick.getDateTime()
 		));
-
-		tickLimit = tickLimit - 1;
-		if(tickLimit < 0){
-			System.exit(0);
-		}
 
 		if(! plan.orderManager.idle()) {// something is still doing
 			// todo: how to track the order?  succeed/failed/partly
@@ -93,15 +86,19 @@ public class Blind extends StrategyAbstract{
 			Plan.Signal signal = plan.doWhat(price);
 			String today = tick.getDateTime().toString(RtConstant.D_FORMAT);
 			String orderId = null;
+			double longInPrice = tick.getUpperLimit();
+			double shortInPrice = tick.getLowPrice();
+			//double longInPrice = tick.getLastPrice();
+			//double shortInPrice = tick.getLastPrice();
 			switch (signal) {
 				case LONG_IN:
 					log.warn("will long in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					orderId = buy(tick.getRtSymbol(), 1, tick.getUpperLimit(), tick.getGatewayID());
+					orderId = buy(tick.getRtSymbol(), 1, longInPrice, tick.getGatewayID());
 					plan.orderManager.addOrder(orderId, null);
 					break;
 				case SHORT_IN:
 					log.warn("will short in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					orderId = sellShort(tick.getRtSymbol(), 1, tick.getLowerLimit(), tick.getGatewayID());
+					orderId = sellShort(tick.getRtSymbol(), 1, shortInPrice, tick.getGatewayID());
 					plan.orderManager.addOrder(orderId, null);
 					break;
 				// todo: only shangHai consider today/yestoday ??
@@ -110,21 +107,21 @@ public class Blind extends StrategyAbstract{
 					if(today.equals(plan.lastInDate)){
 						if(plan.todayVolume > 0) {
 							log.warn("will long out today {}", plan.todayVolume);
-							orderId = sellTd(tick.getRtSymbol(), plan.todayVolume, tick.getLowPrice(), tick.getGatewayID());
+							orderId = sellTd(tick.getRtSymbol(), plan.todayVolume, shortInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// skip today
 						}
 						if(plan.yestodayVolume > 0) {
 							log.warn("will long out yestoday {}", plan.yestodayVolume);
-							orderId = sellYd(tick.getRtSymbol(), plan.yestodayVolume, tick.getLowPrice(), tick.getGatewayID());
+							orderId = sellYd(tick.getRtSymbol(), plan.yestodayVolume, shortInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// no one ??? long out what???
 						}
 					}else{
 						log.warn("will long out all yestoday {}", plan.todayVolume + plan.yestodayVolume);
-						orderId = sellYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, tick.getLowPrice(), tick.getGatewayID());
+						orderId = sellYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, shortInPrice, tick.getGatewayID());
 						plan.orderManager.addOrder(orderId, null);
 					}
 					break;
@@ -133,21 +130,21 @@ public class Blind extends StrategyAbstract{
 					if(today.equals(plan.lastInDate)){
 						if(plan.todayVolume > 0) {
 							log.warn("will short out today {}", plan.todayVolume);
-							orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, tick.getUpperLimit(), tick.getGatewayID());
+							orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, longInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// skip today
 						}
 						if(plan.yestodayVolume > 0) {
 							log.warn("will short out yestoday {}", plan.yestodayVolume);
-							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume, tick.getUpperLimit(), tick.getGatewayID());
+							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume, longInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
 							// no one ??? long out what???
 						}
 					}else{
 						log.warn("will short out all yestoday {}", plan.todayVolume + plan.yestodayVolume);
-						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, tick.getUpperLimit(), tick.getGatewayID());
+						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yestodayVolume + plan.todayVolume, longInPrice, tick.getGatewayID());
 						plan.orderManager.addOrder(orderId, null);
 					}
 					break;
@@ -163,14 +160,14 @@ public class Blind extends StrategyAbstract{
 	@Override
 	public void onBar(Bar bar) throws Exception {
 		// todo: update somethis
-		log.info("call onBar");
+		log.debug("call onBar");
 		savePosition();
 	}
 
 	@Override
 	public void onXMinBar(Bar bar) throws Exception {
 		// todo: save current plans
-		log.info("call onXMinBar");
+		log.debug("call onXMinBar");
 		String symbol = bar.getRtSymbol();
 		Plan plan = plans.get(symbol);
 		String key = Plan.saveKey(symbol);

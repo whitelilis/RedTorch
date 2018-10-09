@@ -120,6 +120,7 @@ public class Plan {
                     } else { // between, maybe update outPrice
                         double maybeBig = newPrice * (1 - lossRate);
                         if (maybeBig > outPrice) {
+                            log.info(String.format("update long out %.2f --> %.2f", outPrice, maybeBig));
                             outPrice = maybeBig;
                         } else {
                             // skip
@@ -134,6 +135,7 @@ public class Plan {
                     } else { // between, maybe update outPrice
                         double maybeSmall = newPrice * (1 + lossRate);
                         if (maybeSmall < outPrice) {
+                            log.info(String.format("update short out %.2f --> %.2f", outPrice, maybeSmall));
                             outPrice = maybeSmall;
                         } else {
                             // skip

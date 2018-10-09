@@ -31,13 +31,23 @@ public class OrderManager {
 				if (order.getOffset().equals(RtConstant.OFFSET_CLOSE) ||
 						order.getOffset().equals(RtConstant.OFFSET_CLOSETODAY) ||
 						order.getOffset().equals(RtConstant.OFFSET_CLOSEYESTERDAY)) {
-					if (order.getDirection().equals(RtConstant.DIRECTION_LONG)) {
-						log.warn("OVER {} ->@ {}", plan.tradePrices.toArray(), order.getPrice());
+					if (order.getDirection().equals(RtConstant.DIRECTION_LONG)) { // close with long, short over
+						double profit = 0;
+						double lastPrice = order.getPrice();
+						for(double one : plan.tradePrices){
+							profit += one - lastPrice;
+						}
+						log.warn("OVER {} {} ->@ {} ==> {}", plan.direction, plan.tradePrices.toArray(), order.getPrice(), profit);
 						log.warn("sell -> buy");
 						blind.plans.clear();
 						blind.plans.put(order.getRtSymbol(), Plan.buyPlan(Blind.lossRate, Blind.profitRate));
-					} else if (order.getDirection().equals(RtConstant.DIRECTION_SHORT)) {
-						log.warn("OVER {} ->@ {}", plan.tradePrices.toArray(), order.getPrice());
+					} else if (order.getDirection().equals(RtConstant.DIRECTION_SHORT)) { // close with short, long over
+						double profit = 0;
+						double lastPrice = order.getPrice();
+						for(double one : plan.tradePrices){
+							profit += lastPrice - one;
+						}
+						log.warn("OVER {} {} ->@ {} ==> {}", plan.direction, plan.tradePrices.toArray(), order.getPrice(), profit);
 						log.warn("buy -> sell");
 						blind.plans.clear();
 						blind.plans.put(order.getRtSymbol(), Plan.sellPlan(Blind.lossRate, Blind.profitRate));
