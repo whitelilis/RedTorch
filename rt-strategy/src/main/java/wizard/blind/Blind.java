@@ -12,6 +12,7 @@ import xyz.redtorch.core.zeus.entity.StopOrder;
 import xyz.redtorch.core.zeus.strategy.StrategyAbstract;
 import xyz.redtorch.core.zeus.strategy.StrategySetting;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -83,11 +84,18 @@ public class Blind extends StrategyAbstract{
 			Plan.Signal signal = plan.doWhat(price);
 			String today = tick.getDateTime().toString(RtConstant.D_FORMAT);
 			String orderId = null;
-			double longInPrice = tick.getUpperLimit();
-			double shortInPrice = tick.getLowPrice();
-			// only for backTest
-			longInPrice = tick.getLastPrice();
-			shortInPrice = tick.getLastPrice();
+
+			// todo : ugly start
+            Date t = new Date();
+            double longInPrice;
+            double shortInPrice;
+            if(tick.getDateTime().toDate().before(new Date())) { // for backtest
+                longInPrice = tick.getLastPrice();
+                shortInPrice = tick.getLastPrice();
+            } else { // for real run
+				longInPrice = tick.getUpperLimit();
+				shortInPrice = tick.getLowPrice();
+            }
 
 			switch (signal) {
 				case LONG_IN:
