@@ -12,7 +12,6 @@ import xyz.redtorch.core.zeus.entity.StopOrder;
 import xyz.redtorch.core.zeus.strategy.StrategyAbstract;
 import xyz.redtorch.core.zeus.strategy.StrategySetting;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -86,16 +85,8 @@ public class Blind extends StrategyAbstract{
 			String orderId = null;
 
 			// todo : ugly start
-            Date t = new Date();
-            double longInPrice;
-            double shortInPrice;
-            if(tick.getDateTime().toDate().before(new Date())) { // for backtest
-                longInPrice = tick.getLastPrice();
-                shortInPrice = tick.getLastPrice();
-            } else { // for real run
-				longInPrice = tick.getUpperLimit();
-				shortInPrice = tick.getLowPrice();
-            }
+			double	longInPrice = tick.getUpperLimit();
+			double	shortInPrice = tick.getLowPrice();
 
 			switch (signal) {
 				case LONG_IN:
@@ -183,8 +174,6 @@ public class Blind extends StrategyAbstract{
 				order.getPrice(), order.getStatus()));
 		OrderManager orderManager = plans.get(order.getRtSymbol()).orderManager;
 		orderManager.handleOrder(this, order);
-
-
 	}
 
 	@Override
@@ -192,15 +181,8 @@ public class Blind extends StrategyAbstract{
 		log.info(String.format("enter trade, get status %s:%s:%d:%f",
 				trade.getRtSymbol(), trade.getDirection(),
 				trade.getVolume(), trade.getPrice()));
-		Plan plan = plans.get(trade.getRtSymbol());
-
-		if(trade.getOffset().equals(RtConstant.OFFSET_OPEN)){
-			plan.tradePrices.add(trade.getPrice());
-			plan.updateVolume(trade);
-		}else{ // close
-			// todo: what to do when close
-		}
-
+		OrderManager orderManager = plans.get(trade.getRtSymbol()).orderManager;
+		orderManager.handleTrade(this, trade);
 	}
 
 	@Override

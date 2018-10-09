@@ -1,20 +1,6 @@
 package xyz.redtorch.core.zeus.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -22,9 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
-
 import xyz.redtorch.core.base.RtConstant;
 import xyz.redtorch.core.entity.Bar;
 import xyz.redtorch.core.entity.Contract;
@@ -45,6 +28,21 @@ import xyz.redtorch.core.zeus.strategy.StrategySetting.ContractSetting;
 import xyz.redtorch.core.zeus.strategy.StrategySetting.TradeGatewaySetting;
 import xyz.redtorch.core.zeus.strategy.StrategySetting.gatewaySetting;
 import xyz.redtorch.utils.CommonUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * @author sun0x00@gmail.com
@@ -494,8 +492,8 @@ public class BacktestingEngineImpl implements BacktestingEngine {
 	private void crossLimitOrder(String rtSymbol) {
 		double buyCrossPrice;
 		double sellCrossPrice;
-		// double buyBestCrossPrice;
-		// double sellBestCrossPrice;
+		double buyBestCrossPrice = 0;
+		double sellBestCrossPrice = 0;
 		if (backtestingDataMode == DATA_MODE_BAR) {
 			buyCrossPrice = barMap.get(rtSymbol).getLow(); // 若买入方向限价单价格高于该价格,则会成交
 			sellCrossPrice = barMap.get(rtSymbol).getHigh(); // 若卖出方向限价单价格低于该价格,则会成交
@@ -505,11 +503,8 @@ public class BacktestingEngineImpl implements BacktestingEngine {
 		} else {
 			buyCrossPrice = tickMap.get(rtSymbol).getAskPrice1(); // 若买入方向限价单价格高于该价格,则会成交
 			sellCrossPrice = tickMap.get(rtSymbol).getBidPrice1(); // 若卖出方向限价单价格低于该价格,则会成交
-			// buyBestCrossPrice = tickMap.get(rtSymbol).getAskPrice1(); //
-			// 在当前时间点前发出的买入委托可能的最优成交价
-			// sellBestCrossPrice = tickMap.get(rtSymbol).getBidPrice1(); //
-			// 在当前时间点前发出的卖出委托可能的最优成交价
-
+			buyBestCrossPrice = tickMap.get(rtSymbol).getAskPrice1(); // 在当前时间点前发出的买入委托可能的最优成交价
+			sellBestCrossPrice = tickMap.get(rtSymbol).getBidPrice1();  // 在当前时间点前发出的卖出委托可能的最优成交价
 		}
 
 		// 遍历限价单字典中的所有限价单
@@ -544,13 +539,15 @@ public class BacktestingEngineImpl implements BacktestingEngine {
 					trade.setOffset(order.getOffset());
 					trade.setGatewayID(order.getGatewayID());
 					// 弃用最优价逻辑,实盘很难达成最优价条件
-					// if(buyCross) {
-					// trade.setPrice(Math.min(order.getPrice(), buyBestCrossPrice));
-					// }else {
-					// trade.setPrice(Math.max(order.getPrice(), sellBestCrossPrice));
-					// }
-
-					trade.setPrice(order.getPrice());
+					if(backtestingDataMode == DATA_MODE_TICK) {
+						if(buyCross) {
+							trade.setPrice(Math.min(order.getPrice(), buyBestCrossPrice));
+						}else {
+							trade.setPrice(Math.max(order.getPrice(), sellBestCrossPrice));
+						}
+					}else { // ignore bar test
+						trade.setPrice(order.getPrice());
+					}
 					trade.setVolume(order.getTotalVolume());
 					trade.setTradingDay(order.getTradingDay());
 					trade.setTradeTime(lastDateTimeMap.get(rtSymbol).toString(RtConstant.T_FORMAT));
