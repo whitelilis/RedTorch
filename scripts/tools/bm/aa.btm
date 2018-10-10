@@ -1,0 +1,8 @@
+RULE aa
+CLASS xyz.redtorch.strategy.routine.pub.impl.wizard.Boloon
+METHOD onInit
+AFTER WRITE $symbol
+IF TRUE
+DO
+    traceln("WWWWWW" + $symbol)
+ENDRULE

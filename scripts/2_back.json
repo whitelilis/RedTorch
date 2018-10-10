@@ -1,0 +1,84 @@
+{
+	"className": "wizard.blind.Blind",
+	"contracts": [
+		{
+			"alias": "rb",
+			"backtestingPriceTick": 0.2,
+			"backtestingSlippage": 0.4,
+			"exchange": "SHFE",
+			"rtSymbol": "rb1901.SHFE",
+			"size": 300,
+			"tradeFixedPos": 2,
+			"tradeGateways": [
+				{
+					"backtestingRate": 0.0001,
+					"gatewayID": "9999.sn.187.10000",
+					"tradeFixedPos": 1
+				}
+			]
+		}	],
+	"gateways": [
+		{
+			"backtestingCapital": 5e+06,
+			"gatewayID": "9999.sn.187.10000",
+			"subscribeRtSymbols": [
+				"rb1901.SHFE"
+			]
+		}
+	],
+	"lastTradingDay": false,
+	"paramMap": {
+	},
+	"preTradingDay": "20180928",
+	"strategyID": "wizard sn",
+	"strategyName": "wizard sn",
+	"tradingDay": "20181008",
+	"varMap": {
+		"nick": "simnow backtest ",
+		"rbLongIn": "4050",
+		"rbShortIn": "4040"
+	},
+	"xMin": 5
+}
+{
+	"className": "wizard.blind.Blind",
+	"contracts": [
+		{
+			"alias": "rb",
+			"backtestingPriceTick": 0.2,
+			"backtestingSlippage": 0.4,
+			"exchange": "SHFE",
+			"rtSymbol": "rb1710.SHFE",
+			"size": 300,
+			"tradeFixedPos": 2,
+			"tradeGateways": [
+				{
+					"backtestingRate": 0.0001,
+					"gatewayID": "backTest",
+					"tradeFixedPos": 1
+				}
+			]
+		}	],
+	"gateways": [
+		{
+			"backtestingCapital": 5e+06,
+			"gatewayID": "backTest",
+			"subscribeRtSymbols": [
+				"rb1710.SHFE"
+			]
+		}
+	],
+	"lastTradingDay": false,
+	"paramMap": {
+	},
+	"preTradingDay": "20180928",
+	"strategyID": "wizard 113",
+	"strategyName": "wizard 113",
+	"tradingDay": "20181008",
+	"varMap": {
+		"nick": "simnow backtest ",
+		"rbLongIn": "4050",
+		"rbShortIn": "4040"
+	},
+	"xMin": 5
+}
