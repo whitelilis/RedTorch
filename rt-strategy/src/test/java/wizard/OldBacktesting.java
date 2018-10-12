@@ -1,5 +1,8 @@
 package wizard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,14 +11,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import xyz.redtorch.core.test.TestConfiguration;
 import xyz.redtorch.core.zeus.BacktestingEngine;
 import xyz.redtorch.core.zeus.BacktestingEngine.BacktestingSection;
 import xyz.redtorch.core.zeus.ZeusDataService;
 import xyz.redtorch.core.zeus.impl.BacktestingEngineImpl;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -43,7 +44,7 @@ public class OldBacktesting {
 		// 分段回测
 		BacktestingSection backtestingSection = new BacktestingSection();
 		backtestingSection.setStartDate("20170401");
-		backtestingSection.setEndDate("20170405");
+		backtestingSection.setEndDate("20170410");
 
 		String aim = "rb1710.SHFE";
 

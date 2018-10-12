@@ -1,7 +1,12 @@
 package wizard.blind;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import xyz.redtorch.core.base.RtConstant;
 import xyz.redtorch.core.entity.Bar;
 import xyz.redtorch.core.entity.Order;
@@ -11,10 +16,6 @@ import xyz.redtorch.core.zeus.ZeusEngineService;
 import xyz.redtorch.core.zeus.entity.StopOrder;
 import xyz.redtorch.core.zeus.strategy.StrategyAbstract;
 import xyz.redtorch.core.zeus.strategy.StrategySetting;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * @author whitelilis@gmail.com
@@ -43,6 +44,7 @@ public class Blind extends StrategyAbstract{
 				this.plans.put(rtSymbol, Plan.fromJson(varMap.get(planKey)));
 			} else {
 				float r = random.nextFloat();
+				System.err.println("random get =========== " + r);
 
 				// force sell
 				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
