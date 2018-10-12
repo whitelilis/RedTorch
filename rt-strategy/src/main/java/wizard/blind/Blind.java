@@ -25,8 +25,8 @@ public class Blind extends StrategyAbstract{
 	public HashMap<String, Plan> plans;
 	private Random random ;
 
-	public static final float lossRate = 0.005f;
-	public static final float profitRate = 0.02f;
+	public static final float lossRate = 0.007f;
+	public static final float profitRate = lossRate * 4;
 
 	public Blind(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
@@ -45,6 +45,7 @@ public class Blind extends StrategyAbstract{
 			} else {
 				float r = random.nextFloat();
 				System.err.println("random get =========== " + r);
+				System.err.println("loss : " + lossRate + ", profit : " + profitRate);
 
 				// force sell
 				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
