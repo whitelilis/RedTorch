@@ -35,8 +35,8 @@
 	"tradingDay": "20181008",
 	"varMap": {
 		"nick": "simnow backtest ",
-		"rbLongIn": "4050",
-		"rbShortIn": "4040"
+		"lossRate": "0.007f",
+		"proTimes": "4f"
 	},
 	"xMin": 5
 }

@@ -36,7 +36,7 @@ public class OrderManager {
 				log.warn("OVER {} {} ->@ {} ==> {}", plan.direction, plan.tradePrices.toArray(), trade.getPrice(), profit);
 				log.warn("sell -> buy");
 				blind.plans.clear();
-				blind.plans.put(trade.getRtSymbol(), Plan.buyPlan(Blind.lossRate, Blind.profitRate));
+				blind.plans.put(trade.getRtSymbol(), Plan.buyPlan(blind.lossRate, blind.profitRate));
 			} else if (trade.getDirection().equals(RtConstant.DIRECTION_SHORT)) { // close with short, long over
 				double profit = 0;
 				double lastPrice = trade.getPrice();
@@ -46,7 +46,7 @@ public class OrderManager {
 				log.warn("OVER {} {} ->@ {} ==> {}", plan.direction, plan.tradePrices.toArray(), trade.getPrice(), profit);
 				log.warn("buy -> sell");
 				blind.plans.clear();
-				blind.plans.put(trade.getRtSymbol(), Plan.sellPlan(Blind.lossRate, Blind.profitRate));
+				blind.plans.put(trade.getRtSymbol(), Plan.sellPlan(blind.lossRate, blind.profitRate));
 			} else {
 				log.error("what kind last order complete {} {} {}",
 						trade.getOrderID(), trade.getDirection(), trade.getOffset());

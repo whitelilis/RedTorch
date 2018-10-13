@@ -25,8 +25,8 @@ public class Blind extends StrategyAbstract{
 	public HashMap<String, Plan> plans;
 	private Random random ;
 
-	public static final float lossRate = 0.007f;
-	public static final float profitRate = lossRate * 4;
+	public float lossRate;
+	public float profitRate;
 
 	public Blind(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
@@ -43,13 +43,15 @@ public class Blind extends StrategyAbstract{
 			if(false && varMap.containsKey(planKey)) {// already traded before
 				this.plans.put(rtSymbol, Plan.fromJson(varMap.get(planKey)));
 			} else {
-				float r = random.nextFloat();
+				float r = Float.parseFloat(varMap.getOrDefault("fakeRand",  "" + random.nextFloat()));
+				lossRate = Float.parseFloat(varMap.getOrDefault("lossRate", "0.007f"));
+				float times = Float.parseFloat(varMap.getOrDefault("proTimes", "4F"));
+				profitRate = lossRate * times;
+
 				System.err.println("random get =========== " + r);
 				System.err.println("loss : " + lossRate + ", profit : " + profitRate);
 
 				// force sell
-				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
-				//this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
 				if (r < 0.5) { // buy long in
 					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
 				} else { // sell short out
