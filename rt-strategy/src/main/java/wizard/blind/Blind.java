@@ -39,8 +39,8 @@ public class Blind extends StrategyAbstract{
 		Map<String, String> varMap = strategySetting.getVarMap();
 		for(StrategySetting.ContractSetting contractSetting : strategySetting.getContracts()){
 			String rtSymbol = contractSetting.getRtSymbol();
-			String planKey = Plan.saveKey(rtSymbol);
-			if(false && varMap.containsKey(planKey)) {// already traded before
+			String planKey = Plan.saveKey(this, rtSymbol);
+			if(varMap.containsKey(planKey)) {// already traded before
 				this.plans.put(rtSymbol, Plan.fromJson(varMap.get(planKey)));
 			} else {
 				float r = random.nextFloat();
@@ -51,8 +51,10 @@ public class Blind extends StrategyAbstract{
 				//this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
 				if (r < 0.5) { // buy long in
 					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
+					varMap.put(planKey, this.plans.get(rtSymbol).toJson());
 				} else { // sell short out
 					this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
+					varMap.put(planKey, this.plans.get(rtSymbol).toJson());
 				}
 			}
 		}
@@ -161,6 +163,10 @@ public class Blind extends StrategyAbstract{
 	public void onBar(Bar bar) throws Exception {
 		// todo: update something
 		log.debug("call onBar");
+		String rtSymbol = bar.getRtSymbol();
+		String planKey = Plan.saveKey(this, rtSymbol);
+		strategySetting.getVarMap().put(planKey, this.plans.get(rtSymbol).toJson());
+		saveStrategySetting();
 	}
 
 	@Override

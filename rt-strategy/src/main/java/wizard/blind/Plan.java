@@ -1,15 +1,18 @@
 package wizard.blind;
 
-import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import xyz.redtorch.core.base.RtConstant;
-import xyz.redtorch.core.entity.Trade;
+import static wizard.blind.Plan.Signal.IMPOSSIABLE;
+import static wizard.blind.Plan.Signal.NOOP;
 
 import java.util.ArrayList;
 
-import static wizard.blind.Plan.Signal.IMPOSSIABLE;
-import static wizard.blind.Plan.Signal.NOOP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSONObject;
+
+import xyz.redtorch.core.base.RtConstant;
+import xyz.redtorch.core.entity.Trade;
+import xyz.redtorch.core.zeus.strategy.StrategyAbstract;
 
 /**
  * Copyright (C) 2006-2017  AdMaster Co.Ltd.
@@ -60,8 +63,8 @@ public class Plan {
         return new Plan(Signal.SHORT_IN, useMax, lossRate, profitRate);
     }
 
-    public static String saveKey(String rtSymbol){
-        return savePrefix + rtSymbol;
+    public static String saveKey(StrategyAbstract strategy, String rtSymbol){
+        return savePrefix + strategy.getClass().getName() + "__" + rtSymbol;
     }
 
     // todo toJson
