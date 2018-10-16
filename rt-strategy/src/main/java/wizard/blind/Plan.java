@@ -64,7 +64,7 @@ public class Plan {
     }
 
     public static String saveKey(StrategyAbstract strategy, String rtSymbol){
-        return savePrefix + strategy.getClass().getName() + "__" + rtSymbol;
+        return savePrefix + strategy.getClass().getName() + "." + rtSymbol;
     }
 
     // todo toJson

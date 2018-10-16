@@ -1,6 +1,5 @@
 package wizard.blind;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -22,11 +21,11 @@ import xyz.redtorch.core.zeus.strategy.StrategySetting;
  */
 public class Blind extends StrategyAbstract{
 	private static final Logger log = LoggerFactory.getLogger(Blind.class);
-	public HashMap<String, Plan> plans;
+	public Plan plan;
 	private Random random ;
 
-	public static final float lossRate = 0.005f;
-	public static final float profitRate = 0.02f;
+	public float lossRate;
+	public float profitRate;
 
 	public Blind(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
@@ -34,27 +33,27 @@ public class Blind extends StrategyAbstract{
 
 	@Override
 	public void onInit() throws Exception {
-	    this.plans = new HashMap<>();
 	    this.random = new java.util.Random();
 		Map<String, String> varMap = strategySetting.getVarMap();
 		for(StrategySetting.ContractSetting contractSetting : strategySetting.getContracts()){
 			String rtSymbol = contractSetting.getRtSymbol();
 			String planKey = Plan.saveKey(this, rtSymbol);
 			if(varMap.containsKey(planKey)) {// already traded before
-				this.plans.put(rtSymbol, Plan.fromJson(varMap.get(planKey)));
+				this.plan = Plan.fromJson(varMap.get(planKey));
 			} else {
-				float r = random.nextFloat();
+				float r = Float.parseFloat(
+						varMap.getOrDefault("random", "" + random.nextFloat()));
+				lossRate = Float.parseFloat(varMap.getOrDefault("lossRate", "0.005"));
+				float proTimes = Float.parseFloat(varMap.getOrDefault("proTimes", "4.0"));
+				profitRate = lossRate * proTimes;
 				System.err.println("random get =========== " + r);
 
-				// force sell
-				//this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
-				//this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
 				if (r < 0.5) { // buy long in
-					this.plans.put(rtSymbol, Plan.buyPlan(lossRate, profitRate));
-					varMap.put(planKey, this.plans.get(rtSymbol).toJson());
+					this.plan = Plan.buyPlan(lossRate, profitRate);
+					varMap.put(planKey, this.plan.toJson());
 				} else { // sell short out
-					this.plans.put(rtSymbol, Plan.sellPlan(lossRate, profitRate));
-					varMap.put(planKey, this.plans.get(rtSymbol).toJson());
+					this.plan = Plan.sellPlan(lossRate, profitRate);
+					varMap.put(planKey, this.plan.toJson());
 				}
 			}
 		}
@@ -72,7 +71,6 @@ public class Blind extends StrategyAbstract{
 
 	@Override
 	public void onTick(Tick tick) throws Exception {
-	    Plan plan = plans.get(tick.getRtSymbol());
 		log.debug(String.format(
 				"%s : %s  %.2f [ %.2f, %.2f ] @ %s",
 				tick.getRtSymbol(), plan.direction,
@@ -88,7 +86,6 @@ public class Blind extends StrategyAbstract{
 			String today = tick.getDateTime().toString(RtConstant.D_FORMAT);
 			String orderId = null;
 
-			// todo : ugly start
 			double	longInPrice = tick.getUpperLimit();
 			double	shortInPrice = tick.getLowPrice();
 
@@ -112,19 +109,24 @@ public class Blind extends StrategyAbstract{
 							orderId = sellTd(tick.getRtSymbol(), plan.todayVolume, shortInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
-							// skip today
+						    // skip empty
 						}
 						if(plan.yesterdayVolume > 0) {
 							log.warn("will long out yestoday {}", plan.yesterdayVolume);
 							orderId = sellYd(tick.getRtSymbol(), plan.yesterdayVolume, shortInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
-							// no one ??? long out what???
+							// skip empty
 						}
-					}else{
-						log.warn("will long out all yestoday {}", plan.todayVolume + plan.yesterdayVolume);
-						orderId = sellYd(tick.getRtSymbol(), plan.yesterdayVolume + plan.todayVolume, shortInPrice, tick.getGatewayID());
-						plan.orderManager.addOrder(orderId, null);
+					}else {
+						int allVolume = plan.yesterdayVolume + plan.todayVolume;
+						if (allVolume > 0){
+							log.warn("will long out all yestoday {}", allVolume);
+							orderId = sellYd(tick.getRtSymbol(), allVolume, shortInPrice, tick.getGatewayID());
+							plan.orderManager.addOrder(orderId, null);
+						}else{
+							throw new Exception("no volume, but out, what happened");
+						}
 					}
 					break;
 				case SHORT_OUT:
@@ -135,19 +137,24 @@ public class Blind extends StrategyAbstract{
 							orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, longInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
-							// skip today
+							// skip empty
 						}
 						if(plan.yesterdayVolume > 0) {
 							log.warn("will short out yestoday {}", plan.yesterdayVolume);
 							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yesterdayVolume, longInPrice, tick.getGatewayID());
 							plan.orderManager.addOrder(orderId, null);
 						}else{
-							// no one ??? long out what???
+						    // skip empty
 						}
 					}else{
-						log.warn("will short out all yestoday {}", plan.todayVolume + plan.yesterdayVolume);
-						orderId = buyToCoverYd(tick.getRtSymbol(), plan.yesterdayVolume + plan.todayVolume, longInPrice, tick.getGatewayID());
-						plan.orderManager.addOrder(orderId, null);
+					    int allVolume = plan.yesterdayVolume + plan.todayVolume;
+					    if(allVolume > 0) {
+							log.warn("will short out all yestoday {}", allVolume);
+							orderId = buyToCoverYd(tick.getRtSymbol(), allVolume, longInPrice, tick.getGatewayID());
+							plan.orderManager.addOrder(orderId, null);
+						}else {
+							throw new Exception("no volume, but out, what happened");
+						}
 					}
 					break;
 				case NOOP:
@@ -165,7 +172,7 @@ public class Blind extends StrategyAbstract{
 		log.debug("call onBar");
 		String rtSymbol = bar.getRtSymbol();
 		String planKey = Plan.saveKey(this, rtSymbol);
-		strategySetting.getVarMap().put(planKey, this.plans.get(rtSymbol).toJson());
+		strategySetting.getVarMap().put(planKey, this.plan.toJson());
 		saveStrategySetting();
 	}
 
@@ -180,8 +187,7 @@ public class Blind extends StrategyAbstract{
 		log.info(String.format("enter order, get status %s:%s:%d:%f:%s",
 				order.getRtSymbol(), order.getDirection(), order.getTotalVolume(),
 				order.getPrice(), order.getStatus()));
-		OrderManager orderManager = plans.get(order.getRtSymbol()).orderManager;
-		orderManager.handleOrder(this, order);
+		plan.orderManager.handleOrder(this, order);
 	}
 
 	@Override
@@ -189,8 +195,7 @@ public class Blind extends StrategyAbstract{
 		log.info(String.format("enter trade, get status %s:%s:%d:%f",
 				trade.getRtSymbol(), trade.getDirection(),
 				trade.getVolume(), trade.getPrice()));
-		OrderManager orderManager = plans.get(trade.getRtSymbol()).orderManager;
-		orderManager.handleTrade(this, trade);
+		plan.orderManager.handleTrade(this, trade);
 	}
 
 	@Override

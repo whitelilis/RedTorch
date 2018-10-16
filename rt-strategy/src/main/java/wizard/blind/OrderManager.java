@@ -1,12 +1,13 @@
 package wizard.blind;
 
+import java.util.TreeMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import xyz.redtorch.core.base.RtConstant;
 import xyz.redtorch.core.entity.Order;
 import xyz.redtorch.core.entity.Trade;
-
-import java.util.TreeMap;
 
 /**
  * Copyright (C) 2006-2017  AdMaster Co.Ltd.
@@ -23,7 +24,7 @@ public class OrderManager {
 
 
 	public void handleTrade(Blind blind, Trade trade){
-		Plan plan = blind.plans.get(trade.getRtSymbol());
+		Plan plan = blind.plan;
 		if (trade.getOffset().equals(RtConstant.OFFSET_CLOSE) ||
 				trade.getOffset().equals(RtConstant.OFFSET_CLOSETODAY) ||
 				trade.getOffset().equals(RtConstant.OFFSET_CLOSEYESTERDAY)) {
@@ -35,8 +36,7 @@ public class OrderManager {
 				}
 				log.warn("OVER {} {} ->@ {} ==> {}", plan.direction, plan.tradePrices.toArray(), trade.getPrice(), profit);
 				log.warn("sell -> buy");
-				blind.plans.clear();
-				blind.plans.put(trade.getRtSymbol(), Plan.buyPlan(Blind.lossRate, Blind.profitRate));
+				blind.plan = Plan.buyPlan(blind.lossRate, blind.profitRate);
 			} else if (trade.getDirection().equals(RtConstant.DIRECTION_SHORT)) { // close with short, long over
 				double profit = 0;
 				double lastPrice = trade.getPrice();
@@ -45,8 +45,7 @@ public class OrderManager {
 				}
 				log.warn("OVER {} {} ->@ {} ==> {}", plan.direction, plan.tradePrices.toArray(), trade.getPrice(), profit);
 				log.warn("buy -> sell");
-				blind.plans.clear();
-				blind.plans.put(trade.getRtSymbol(), Plan.sellPlan(Blind.lossRate, Blind.profitRate));
+				blind.plan = Plan.sellPlan(blind.lossRate, blind.profitRate);
 			} else {
 				log.error("what kind last order complete {} {} {}",
 						trade.getOrderID(), trade.getDirection(), trade.getOffset());
