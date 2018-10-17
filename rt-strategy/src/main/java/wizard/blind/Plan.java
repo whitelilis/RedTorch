@@ -22,7 +22,7 @@ import xyz.redtorch.core.zeus.strategy.StrategyAbstract;
  */
 public class Plan {
     private static final Logger log = LoggerFactory.getLogger(Plan.class);
-    public static final String savePrefix = "wizard_plan_";
+    public static final String savePrefix = "wizard.plan.";
     public static final double useMin = 0.88;
     public static final double useMax = 88888888.88;
     public int todayVolume = 0;

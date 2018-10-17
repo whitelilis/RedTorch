@@ -23,6 +23,7 @@ public class Blind extends StrategyAbstract{
 	private static final Logger log = LoggerFactory.getLogger(Blind.class);
 	public Plan plan;
 	private Random random ;
+	private double impossiablePrice = 1E100;
 
 	public float lossRate;
 	public float profitRate;
@@ -77,91 +78,97 @@ public class Blind extends StrategyAbstract{
 				tick.getLastPrice(),  plan.inPrice, plan.outPrice,
 				tick.getDateTime()
 		));
+		if(tick.getOpenPrice() > impossiablePrice ||
+				tick.getAskPrice1() > impossiablePrice ||
+		tick.getBidPrice1() > impossiablePrice){
+			log.warn("impossible tick open {} # ask {} # bid {}, ignore it.", tick.getOpenPrice(), tick.getAskPrice1(), tick.getBidPrice1());
+			return;
+		}else {// regular tick
+			if (!plan.orderManager.idle()) {// something is still doing
+				log.info("{} {}  is still doing; omit this tick", tick.getRtSymbol(), plan.orderManager.getOrders());
+			} else {
+				double price = tick.getLastPrice();
+				Plan.Signal signal = plan.doWhat(price);
+				String today = tick.getTradingDay();
+				String orderId = null;
 
-		if(! plan.orderManager.idle()) {// something is still doing
-			log.info("{} {}  is still doing; omit this tick", tick.getRtSymbol(), plan.orderManager.getOrders());
-		} else {
-			double price = tick.getLastPrice();
-			Plan.Signal signal = plan.doWhat(price);
-			String today = tick.getDateTime().toString(RtConstant.D_FORMAT);
-			String orderId = null;
+				double longInPrice = tick.getUpperLimit();
+				double shortInPrice = tick.getLowPrice();
 
-			double	longInPrice = tick.getUpperLimit();
-			double	shortInPrice = tick.getLowPrice();
-
-			switch (signal) {
-				case LONG_IN:
-					log.warn("will long in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					orderId = buy(tick.getRtSymbol(), 1, longInPrice, tick.getGatewayID());
-					plan.orderManager.addOrder(orderId, null);
-					break;
-				case SHORT_IN:
-					log.warn("will short in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					orderId = sellShort(tick.getRtSymbol(), 1, shortInPrice, tick.getGatewayID());
-					plan.orderManager.addOrder(orderId, null);
-					break;
-				// todo: only shangHai consider today/yestoday ??
-				case LONG_OUT:
-					log.warn("will long out on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					if(today.equals(plan.lastInDate)){
-						if(plan.todayVolume > 0) {
-							log.warn("will long out today {}", plan.todayVolume);
-							orderId = sellTd(tick.getRtSymbol(), plan.todayVolume, shortInPrice, tick.getGatewayID());
-							plan.orderManager.addOrder(orderId, null);
-						}else{
-						    // skip empty
+				switch (signal) {
+					case LONG_IN:
+						log.warn("will long in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
+						orderId = buy(tick.getRtSymbol(), 1, longInPrice, tick.getGatewayID());
+						plan.orderManager.addOrder(orderId, null);
+						break;
+					case SHORT_IN:
+						log.warn("will short in on {} @ {}", tick.getLastPrice(), tick.getActionTime());
+						orderId = sellShort(tick.getRtSymbol(), 1, shortInPrice, tick.getGatewayID());
+						plan.orderManager.addOrder(orderId, null);
+						break;
+					// todo: only shangHai consider today/yestoday ??
+					case LONG_OUT:
+						log.warn("will long out on {} @ {}", tick.getLastPrice(), tick.getActionTime());
+						if (today.equals(plan.lastInDate)) {
+							if (plan.todayVolume > 0) {
+								log.warn("will long out today {}", plan.todayVolume);
+								orderId = sellTd(tick.getRtSymbol(), plan.todayVolume, shortInPrice, tick.getGatewayID());
+								plan.orderManager.addOrder(orderId, null);
+							} else {
+								// skip empty
+							}
+							if (plan.yesterdayVolume > 0) {
+								log.warn("will long out yestoday {}", plan.yesterdayVolume);
+								orderId = sellYd(tick.getRtSymbol(), plan.yesterdayVolume, shortInPrice, tick.getGatewayID());
+								plan.orderManager.addOrder(orderId, null);
+							} else {
+								// skip empty
+							}
+						} else {
+							int allVolume = plan.yesterdayVolume + plan.todayVolume;
+							if (allVolume > 0) {
+								log.warn("will long out all yestoday {}", allVolume);
+								orderId = sellYd(tick.getRtSymbol(), allVolume, shortInPrice, tick.getGatewayID());
+								plan.orderManager.addOrder(orderId, null);
+							} else {
+								throw new Exception("no volume, but out, what happened");
+							}
 						}
-						if(plan.yesterdayVolume > 0) {
-							log.warn("will long out yestoday {}", plan.yesterdayVolume);
-							orderId = sellYd(tick.getRtSymbol(), plan.yesterdayVolume, shortInPrice, tick.getGatewayID());
-							plan.orderManager.addOrder(orderId, null);
-						}else{
-							// skip empty
+						break;
+					case SHORT_OUT:
+						log.warn("will short out on {} @ {}", tick.getLastPrice(), tick.getActionTime());
+						if (today.equals(plan.lastInDate)) {
+							if (plan.todayVolume > 0) {
+								log.warn("will short out today {}", plan.todayVolume);
+								orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, longInPrice, tick.getGatewayID());
+								plan.orderManager.addOrder(orderId, null);
+							} else {
+								// skip empty
+							}
+							if (plan.yesterdayVolume > 0) {
+								log.warn("will short out yestoday {}", plan.yesterdayVolume);
+								orderId = buyToCoverYd(tick.getRtSymbol(), plan.yesterdayVolume, longInPrice, tick.getGatewayID());
+								plan.orderManager.addOrder(orderId, null);
+							} else {
+								// skip empty
+							}
+						} else {
+							int allVolume = plan.yesterdayVolume + plan.todayVolume;
+							if (allVolume > 0) {
+								log.warn("will short out all yestoday {}", allVolume);
+								orderId = buyToCoverYd(tick.getRtSymbol(), allVolume, longInPrice, tick.getGatewayID());
+								plan.orderManager.addOrder(orderId, null);
+							} else {
+								throw new Exception("no volume, but out, what happened");
+							}
 						}
-					}else {
-						int allVolume = plan.yesterdayVolume + plan.todayVolume;
-						if (allVolume > 0){
-							log.warn("will long out all yestoday {}", allVolume);
-							orderId = sellYd(tick.getRtSymbol(), allVolume, shortInPrice, tick.getGatewayID());
-							plan.orderManager.addOrder(orderId, null);
-						}else{
-							throw new Exception("no volume, but out, what happened");
-						}
-					}
-					break;
-				case SHORT_OUT:
-					log.warn("will short out on {} @ {}", tick.getLastPrice(), tick.getActionTime());
-					if(today.equals(plan.lastInDate)){
-						if(plan.todayVolume > 0) {
-							log.warn("will short out today {}", plan.todayVolume);
-							orderId = buyToCoverTd(tick.getRtSymbol(), plan.todayVolume, longInPrice, tick.getGatewayID());
-							plan.orderManager.addOrder(orderId, null);
-						}else{
-							// skip empty
-						}
-						if(plan.yesterdayVolume > 0) {
-							log.warn("will short out yestoday {}", plan.yesterdayVolume);
-							orderId = buyToCoverYd(tick.getRtSymbol(), plan.yesterdayVolume, longInPrice, tick.getGatewayID());
-							plan.orderManager.addOrder(orderId, null);
-						}else{
-						    // skip empty
-						}
-					}else{
-					    int allVolume = plan.yesterdayVolume + plan.todayVolume;
-					    if(allVolume > 0) {
-							log.warn("will short out all yestoday {}", allVolume);
-							orderId = buyToCoverYd(tick.getRtSymbol(), allVolume, longInPrice, tick.getGatewayID());
-							plan.orderManager.addOrder(orderId, null);
-						}else {
-							throw new Exception("no volume, but out, what happened");
-						}
-					}
-					break;
-				case NOOP:
-					break;
-				default:
-					log.error("get signal {} @ tick.", signal);
-					System.exit(0);
+						break;
+					case NOOP:
+						break;
+					default:
+						log.error("get signal {} @ tick.", signal);
+						System.exit(0);
+				}
 			}
 		}
 	}
