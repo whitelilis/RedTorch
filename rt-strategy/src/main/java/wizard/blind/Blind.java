@@ -43,7 +43,7 @@ public class Blind extends StrategyAbstract{
 			} else {
 				float r = Float.parseFloat(
 						varMap.getOrDefault("random", "" + random.nextFloat()));
-				lossRate = Float.parseFloat(varMap.getOrDefault("lossRate", "0.005"));
+				lossRate = Float.parseFloat(varMap.getOrDefault("lossRate", "0.007"));
 				float proTimes = Float.parseFloat(varMap.getOrDefault("proTimes", "4.0"));
 				profitRate = lossRate * proTimes;
 				System.err.println("random get =========== " + r);
