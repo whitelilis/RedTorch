@@ -6,7 +6,6 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import xyz.redtorch.core.base.RtConstant;
 import xyz.redtorch.core.entity.Bar;
 import xyz.redtorch.core.entity.Order;
 import xyz.redtorch.core.entity.Tick;

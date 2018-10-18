@@ -64,7 +64,7 @@ public class Plan {
     }
 
     public static String saveKey(StrategyAbstract strategy, String rtSymbol){
-        return savePrefix + strategy.getClass().getName() + "." + rtSymbol;
+        return (savePrefix + strategy.getClass().getName() + "." + rtSymbol).replaceAll("\\.", "");
     }
 
     // todo toJson
@@ -112,7 +112,7 @@ public class Plan {
 
     public Signal doWhat(double newPrice){
         if(! validate()){
-            log.error("555555555555555 invlidate plan.");
+            log.error("555555555555555 invlidate plan: direction {}, inPrice {}, outPrice {}", direction, inPrice, outPrice);
             return IMPOSSIABLE;
         }else {
             switch (direction) {
@@ -124,8 +124,12 @@ public class Plan {
                     } else { // between, maybe update outPrice
                         double maybeBig = newPrice * (1 - lossRate);
                         if (maybeBig > outPrice) {
-                            log.info(String.format("update long out %.2f --> %.2f", outPrice, maybeBig));
+                            double lastInPrice = tradePrices.get(tradePrices.size() - 1);
+                            log.info(String.format("update long out %.2f --> %.2f ==> %.2f", outPrice, maybeBig, maybeBig - lastInPrice));
                             outPrice = maybeBig;
+                            if(outPrice >= lastInPrice){
+                                log.info("meet last in price {}.", lastInPrice);
+                            }
                         } else {
                             // skip
                         }
@@ -139,8 +143,12 @@ public class Plan {
                     } else { // between, maybe update outPrice
                         double maybeSmall = newPrice * (1 + lossRate);
                         if (maybeSmall < outPrice) {
-                            log.info(String.format("update short out %.2f --> %.2f", outPrice, maybeSmall));
+                            double lastInPrice = tradePrices.get(tradePrices.size() - 1);
+                            log.info(String.format("update short out %.2f --> %.2f ==> %.2f", outPrice, maybeSmall, lastInPrice - maybeSmall));
                             outPrice = maybeSmall;
+                            if(outPrice <= lastInPrice){
+                                log.info("meet last in price {}.", lastInPrice);
+                            }
                         } else {
                             // skip
                         }
