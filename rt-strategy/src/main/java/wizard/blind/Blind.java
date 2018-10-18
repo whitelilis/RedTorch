@@ -89,6 +89,7 @@ public class Blind extends StrategyAbstract{
 				double price = tick.getLastPrice();
 				Plan.Signal signal = plan.doWhat(price);
 				String today = tick.getTradingDay();
+				log.info("tick tradingDay {}, plan last in date {}", today, plan.lastInDate);
 				String orderId = null;
 
 				double longInPrice = tick.getUpperLimit();
