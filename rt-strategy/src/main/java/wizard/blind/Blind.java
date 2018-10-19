@@ -179,8 +179,7 @@ public class Blind extends StrategyAbstract{
 		log.debug("call onBar");
 		String rtSymbol = bar.getRtSymbol();
 		String planKey = Plan.saveKey(this, rtSymbol);
-		strategySetting.getVarMap().put(planKey, this.plan.toJson());
-		saveStrategySetting();
+		setVarValue(planKey, this.plan.toJson()); // save is invoke in it
 	}
 
 	@Override
