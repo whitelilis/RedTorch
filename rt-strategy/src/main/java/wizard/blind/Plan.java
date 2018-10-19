@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
-import xyz.redtorch.core.base.RtConstant;
 import xyz.redtorch.core.entity.Trade;
 import xyz.redtorch.core.zeus.strategy.StrategyAbstract;
 
@@ -79,8 +78,7 @@ public class Plan {
 
 
     public void updateVolume(Trade openTrade){
-        String tradeDate1 = openTrade.getTradeDate(); // yyyyMMdd
-        String tradeDate =  (tradeDate1 != null && tradeDate1.length() == 8) ? tradeDate1 : openTrade.getDateTime().toString(RtConstant.D_FORMAT_INT);
+        String tradeDate =  openTrade.getTradingDay();
         if(lastInDate == null || lastInDate.equals(tradeDate)) {// first complete order, or the same day
             todayVolume += openTrade.getVolume();
         }else{
