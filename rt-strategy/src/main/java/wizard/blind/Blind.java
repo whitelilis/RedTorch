@@ -6,6 +6,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import wizard.tools.Alert;
 import xyz.redtorch.core.entity.Bar;
 import xyz.redtorch.core.entity.Order;
 import xyz.redtorch.core.entity.Tick;
@@ -26,6 +27,8 @@ public class Blind extends StrategyAbstract{
 
 	public float lossRate;
 	public float profitRate;
+	public int maxSleepTicks = 20;
+	public int sleepTick = maxSleepTicks;
 
 	public Blind(ZeusEngineService zeusEngineService, StrategySetting strategySetting) {
 		super(zeusEngineService, strategySetting);
@@ -85,7 +88,13 @@ public class Blind extends StrategyAbstract{
 		}else {// regular tick
 			if (!plan.orderManager.idle()) {// something is still doing
 				log.info("{} {}  is still doing; omit this tick", tick.getRtSymbol(), plan.orderManager.getOrders());
+				sleepTick--;
+				if(sleepTick == 0){
+					Alert.alert("order doing more than " + maxSleepTicks + " ticks");
+					stopTrading(true);
+				}
 			} else {
+				sleepTick = maxSleepTicks;
 				double price = tick.getLastPrice();
 				Plan.Signal signal = plan.doWhat(price);
 				String today = tick.getTradingDay();
